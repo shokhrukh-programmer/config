@@ -1,1 +1,54 @@
+resilience4j:
+  circuitbreaker:
+    instances:
+      productService:
+        failureRateThreshold: 50  # Open circuit if 50% of calls fail
+        waitDurationInOpenState: 1000ms  # Wait before retrying failed service
+        permittedNumberOfCallsInHalfOpenState: 100000  # Calls allowed before closing circuit
+        slidingWindowSize: 5  # Monitor last 5 calls
+  retry:
+    instances:
+      productService:
+        maxAttempts: 10000  # Retry failed call 3 times
+        waitDuration: 2000ms  # Wait 2 seconds before retrying
+  ratelimiter:
+    instances:
+      myRateLimiter:
+        limit-for-period: 5
+        limit-refresh-period: 10s
+        timeout-duration: 1000ms
+
+spring:
+  application:
+    name: order-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/order_service
+    username: postgres
+    password: 1
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+  sleuth:
+    sampler:
+      probability: 1.0
+  zipkin:
+    base-url: http://localhost:9411
+
+
+
+  cloud:
+    compatibility-verifier:
+      enabled: false
+server:
+  port: 8081
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+logging:
+  pattern:
+    level: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n traceId=%X{traceId} spanId=%X{spanId}"
 
